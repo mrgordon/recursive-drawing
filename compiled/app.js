@@ -65,8 +65,91 @@
 
   model = require("model");
 
+function drawDice(ctx, x, y, size, value, diceColor, dotColor){
+  dots = [];
+  ctx.save();
+  ctx.fillStyle = diceColor;
+  ctx.translate(x, y);
+  roundRect(ctx, 0, 0, size, size, size*0.1, true, true);
+  
+  //define dot locations
+  var padding = 0.25;
+  var x, y;
+  x = padding*size;
+  y = padding*size;
+  dots.push({x: x, y: y});
+  y = size*0.5;
+  dots.push({x: x, y: y});
+  y = size * (1-padding);
+  dots.push({x: x, y: y});
+  x = size*0.5;
+  y = size*0.5;
+  dots.push({x: x, y: y});
+  x = size * (1-padding);
+  y = padding*size;
+  dots.push({x: x, y: y});
+  y = size*0.5;
+  dots.push({x: x, y: y});
+  y = size * (1-padding);
+  dots.push({x: x, y: y});
+  //for(var i=0; i<dots.length; i++) console.log(dots[i]);
+  
+  var dotsToDraw;
+  if (value == 1) dotsToDraw = [3];
+  else if (value == 2) dotsToDraw = [0, 6];
+  else if (value == 3) dotsToDraw = [0, 3, 6];
+  else if (value == 4) dotsToDraw = [0, 2, 4, 6];
+  else if (value == 5) dotsToDraw = [0, 2, 3, 4, 6];
+  else if (value == 6) dotsToDraw = [0, 1, 2, 4, 5, 6];
+  else console.log("Dice value shall be between 1 and 6");
+    
+  ctx.fillStyle = dotColor;
+  for (var i=0; i<dotsToDraw.length; i++) {
+    ctx.beginPath();
+    var j = dotsToDraw[i];
+    ctx.arc(dots[j].x, dots[j].y, size*0.07, 0, 2*Math.PI);
+    ctx.fill();
+  }
+}
+
+function roundRect(ctx, x, y, width, height, radius, fill, stroke) {
+  if (typeof stroke == 'undefined') {
+    stroke = true;
+  }
+  if (typeof radius === 'undefined') {
+    radius = 5;
+  }
+  if (typeof radius === 'number') {
+    radius = {tl: radius, tr: radius, br: radius, bl: radius};
+  } else {
+    var defaultRadius = {tl: 0, tr: 0, br: 0, bl: 0};
+    for (var side in defaultRadius) {
+      radius[side] = radius[side] || defaultRadius[side];
+    }
+  }
+  ctx.beginPath();
+  ctx.moveTo(x + radius.tl, y);
+  ctx.lineTo(x + width - radius.tr, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+  ctx.lineTo(x + width, y + height - radius.br);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+  ctx.lineTo(x + radius.bl, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+  ctx.lineTo(x, y + radius.tl);
+  ctx.quadraticCurveTo(x, y, x + radius.tl, y);
+  ctx.closePath();
+  if (fill) {
+    ctx.fill();
+  }
+  if (stroke) {
+    ctx.stroke();
+  }
+
+}
+
   circle = model.makePrimitiveDefinition(function(ctx) {
-    return ctx.arc(0, 0, 1 * require("config").normalizeConstant, 0, Math.PI * 2);
+      var n = require("config").normalizeConstant;
+      return drawDice(ctx, 50, 50, 100, 6, 'white', "#332");
   });
 
   square = model.makePrimitiveDefinition(function(ctx) {
